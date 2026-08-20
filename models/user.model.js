@@ -23,14 +23,15 @@ const userSchema = new Schema({
     },
     avatar: {
         type: String,
-        require: true,
     },
     role: {
-        type: String,
-    }
+    type: String,
+    enum: ["candidate", "recruiter"],
+    default: "candidate"
+}
 
 },
-    { timestamp: true }
+    { timestamps: true }
 )
 
 export const User = mongoose.model("User", userSchema)    
