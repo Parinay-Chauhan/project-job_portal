@@ -25,10 +25,10 @@ const userSchema = new Schema({
         type: String,
     },
     role: {
-    type: String,
-    enum: ["candidate", "recruiter"],
-    default: "candidate"
-}
+        type: String,
+        enum: ["candidate", "recruiter"],
+        default: "candidate"
+    }
 
 },
     { timestamps: true }
