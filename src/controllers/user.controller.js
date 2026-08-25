@@ -30,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // Create a new user in the database ( MongoDB will handle password hashing if you have set up pre-save middleware in the User model)
 
     const user = await User.create({
-        // fullName,
+        fullName,
         email,
         password,
         username,
