@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
 
-const generateAccessAndRefreshToken = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
@@ -15,9 +15,8 @@ const generateAccessAndRefreshToken = async (userId) => {
         return { accessToken, refreshToken }
 
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating refresh and access token")
+        throw new ApiError(500, "Something went wrong while generating referesh and access token")
     }
-
 }
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -85,7 +84,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Username/email and password are required");
     }
 
-    const query = username? { username }: { email };
+    const query = username ? { username } : { email };
 
     const user = await User.findOne(query);
 
@@ -99,7 +98,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid User credentials")
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
 
     const loggedInUser = await User.findById(user._id).select(
         "-password -refreshToken"
