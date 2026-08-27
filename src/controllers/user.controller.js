@@ -1,4 +1,4 @@
-import { asyncHandler } from "../utils/asyncHandler.js"
+import { asyncHandler } from "../utils/AsyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
@@ -125,4 +125,36 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
-export { registerUser, loginUser }
+const logoutUser = asyncHandler(async (req, res) => {
+    
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset: {
+                // refreshToken: 1,  ye bhi theek hai
+                refreshToken: "",
+            },
+        },
+        {
+            new: true
+        },
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    }
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new ApiResponse(200, {}, "User Logout Successfully")
+        )
+
+})
+
+
+export { registerUser, loginUser, logoutUser }
