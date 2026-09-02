@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -291,7 +292,30 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     );
 });
 
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  console.log(req.file);
 
+  if (!req.file) {
+    throw new ApiError(400, "File is required");
+  }
+
+  const result = await uploadOnCloudinary(req.file.path);
+
+  if (!result) {
+    throw new ApiError(500, "File upload failed");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        url: result.secure_url,
+        public_id: result.public_id,
+      },
+      "File uploaded to Cloudinary successfully",
+    ),
+  );
+});
 
 export {
   registerUser,
@@ -301,4 +325,5 @@ export {
   getCurrentUser,
   changePassword,
   updateAccountDetails,
+  updateUserAvatar,
 };
