@@ -244,6 +244,55 @@ const changePassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "password changed successfully"));
 });
 
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { fullName, email, username } = req.body;
+
+  if (!fullName && !email && !username) {
+    throw new ApiError(400, "At least one field is required");
+  }
+  const user = req.user;
+
+  if (!user) {
+    throw new ApiError(401, "Invalid User");
+  }
+
+  const existedUser = await User.findOne({
+    $or: [{ username }, { email }],
+    _id: { $ne: user._id }, // _id current user's _id ke equal nahi hona chahiye.
+  });
+
+  if (existedUser) {
+    throw new ApiError(409, "User already exists");
+  }
+
+  const updateDetails = await User.findByIdAndUpdate(
+    user?._id,
+    {
+      $set: {
+        ...(fullName && { fullName }),
+        ...(email && { email }),
+        ...(username && { username }),
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updateDetails,
+        "Update Account details Successfully",
+      ),
+    );
+});
+
+
+
 export {
   registerUser,
   loginUser,
@@ -251,4 +300,5 @@ export {
   refreshAccessToken,
   getCurrentUser,
   changePassword,
+  updateAccountDetails,
 };
