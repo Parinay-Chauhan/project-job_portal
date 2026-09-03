@@ -292,29 +292,65 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     );
 });
 
+// const updateUserAvatar = asyncHandler(async (req, res) => {
+//   console.log(req.file);
+
+//   if (!req.file) {
+//     throw new ApiError(400, "File is required");
+//   }
+
+//   const result = await uploadOnCloudinary(req.file.path);
+
+//   if (!result) {
+//     throw new ApiError(500, "File upload failed");
+//   }
+
+//   return res.status(200).json(
+//     new ApiResponse(
+//       200,
+//       {
+//         url: result.secure_url,
+//         public_id: result.public_id,
+//       },
+//       "File uploaded to Cloudinary successfully",
+//     ),
+//   );
+// });
+
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  console.log(req.file);
+  const avatarLocalPath = res.file;
 
-  if (!req.file) {
-    throw new ApiError(400, "File is required");
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar File is required");
   }
 
-  const result = await uploadOnCloudinary(req.file.path);
+  const avatar = await uploadOnCloudinary(req.file.path);
 
-  if (!result) {
-    throw new ApiError(500, "File upload failed");
+  if (!avatar) {
+    throw new ApiError(400, "File upload failed");
   }
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        url: result.secure_url,
-        public_id: result.public_id,
+  const url = result.secure_url;
+
+  if (!url) {
+    throw new ApiError(400, "url is missing");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    res.file,
+    {
+      $set: {
+        avatar: avatar.url,
       },
-      "File uploaded to Cloudinary successfully",
-    ),
-  );
+    },
+    { new: true },
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user, "File uploaded to Cloudinary successfully"),
+    );
 });
 
 export {
