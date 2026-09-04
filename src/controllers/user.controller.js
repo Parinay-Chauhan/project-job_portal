@@ -318,9 +318,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 // });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = res.file;
+  const file = req.file;
 
-  if (!avatarLocalPath) {
+  if (!file) {
     throw new ApiError(400, "Avatar File is required");
   }
 
@@ -330,20 +330,25 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "File upload failed");
   }
 
-  const url = result.secure_url;
+  const url = avatar.secure_url;
 
   if (!url) {
     throw new ApiError(400, "url is missing");
   }
 
   const user = await User.findByIdAndUpdate(
-    res.file,
+    req.user._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: avatar.secure_url,
+        // avatar: url,
+        avatarPublicId: avatar.public_id,
       },
     },
-    { new: true },
+    {
+      new: true,
+      runValidators: true,
+    },
   ).select("-password -refreshToken");
 
   return res
