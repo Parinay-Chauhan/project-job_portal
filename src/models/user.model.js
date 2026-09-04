@@ -25,7 +25,9 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String,
-      avatarPublicId: String,
+    },
+    avatarPublicId: {
+      type: String,
     },
     role: {
       type: String,
