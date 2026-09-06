@@ -321,12 +321,23 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 // });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
+  // 1. Current User fetch karo & oldAvatarPublicId save karo
+  const currentUser = await User.findById(req.user._id);
+
+  if (!currentUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const oldAvatarPublicId = currentUser.avatarPublicId;
+
+  // 2. req.file check
   const file = req.file;
 
   if (!file) {
     throw new ApiError(400, "Avatar File is required");
   }
 
+  // 3. New image → Cloudinary
   const avatar = await uploadOnCloudinary(req.file.path);
 
   if (!avatar) {
@@ -339,25 +350,51 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "url is missing");
   }
 
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: {
-        // avatar: avatar.secure_url,
-        avatar: url,
-        avatarPublicId: avatar.public_id,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    },
-  ).select("-password -refreshToken");
+  let updatedUser;
 
+  // 5. MongoDB → new URL + new publicId
+  try {
+    updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          avatar: url,
+          avatarPublicId: avatar.public_id,
+          // avatar: avatar.secure_url,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).select("-password -refreshToken");
+
+    if (!updatedUser) {
+      await deleteFromCloudinary(avatar.public_id);
+      throw new ApiError(404, "User not found");
+    }
+  } catch (error) {
+    // 6. DB fail? → NEW Cloudinary image delete → Error
+    await deleteFromCloudinary(avatar.public_id);
+    throw new ApiError(
+      500,
+      "Database update failed, uploaded file rolled back",
+    );
+  }
+
+  // 7. DB success → oldAvatarPublicId hai? YES → old image delete
+  if (oldAvatarPublicId) {
+    await deleteFromCloudinary(oldAvatarPublicId);
+  }
+  // 8. Response
   return res
     .status(200)
     .json(
-      new ApiResponse(200, user, "File uploaded to Cloudinary successfully"),
+      new ApiResponse(
+        200,
+        updatedUser,
+        "File uploaded to Cloudinary successfully",
+      ),
     );
 });
 
