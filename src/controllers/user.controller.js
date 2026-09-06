@@ -3,7 +3,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -358,6 +361,34 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteUserAvatar = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (!user.avatarPublicId) {
+    throw new ApiError(400, "User does not have an avatar to delete");
+  }
+
+  // Delete the avatar from Cloudinary
+  const result = await deleteFromCloudinary(user.avatarPublicId);
+
+  if (!result) {
+    throw new ApiError(500, "Failed to delete avatar from Cloudinary");
+  }
+
+  // Remove the avatar fields from the user document
+  user.avatar = undefined;
+  user.avatarPublicId = undefined;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User avatar deleted successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -367,4 +398,5 @@ export {
   changePassword,
   updateAccountDetails,
   updateUserAvatar,
+  deleteUserAvatar,
 };
