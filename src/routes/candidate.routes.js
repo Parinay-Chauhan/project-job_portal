@@ -3,6 +3,7 @@ import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
   createCandidateProfile,
   getCandidateProfile,
+  updateCandidateProfile,
 } from "../controllers/candidate.controller.js";
 
 const router = Router();
@@ -12,5 +13,8 @@ router
   .post(verifyJWT, createCandidateProfile)
   .get(verifyJWT, getCandidateProfile);
 
+router
+  .route("/profile")
+  .patch(verifyJWT, updateCandidateProfile);
   
 export default router;
