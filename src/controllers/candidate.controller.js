@@ -88,4 +88,61 @@ const getCandidateProfile = asyncHandler(async (req, res) => {
     );
 });
 
-export { createCandidateProfile, getCandidateProfile };
+const updateCandidateProfile = asyncHandler(async (req, res) => {
+  const authenticatedUser = req.user;
+
+  if (!authenticatedUser) {
+    throw new ApiError(401, "Invalid User");
+  }
+
+  const existedcandidate = await Candidate.findOne({
+    user: req.user._id,
+  });
+
+  if (!existedcandidate) {
+    throw new ApiError(404, "Candidate not found");
+  }
+
+  const {
+    bio,
+    location,
+    skills,
+    experience,
+    education,
+    linkedin,
+    github,
+    portfolio,
+  } = req.body;
+
+  const updateCandidate = await Candidate.findByIdAndUpdate(
+    existedcandidate._id,
+    {
+      $set: {
+        ...(bio !== undefined && { bio }),
+        ...(location !== undefined && { location }),
+        ...(skills !== undefined && { skills }),
+        ...(experience !== undefined && { experience }),
+        ...(education !== undefined && { education }),
+        ...(linkedin !== undefined && { linkedin }),
+        ...(github !== undefined && { github }),
+        ...(portfolio !== undefined && { portfolio }),
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updateCandidate,
+        "update candidate profile successfully",
+      ),
+    );
+});
+
+export { createCandidateProfile, getCandidateProfile, updateCandidateProfile };
