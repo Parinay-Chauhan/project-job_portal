@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
-  addExperience,
   createCandidateProfile,
   getCandidateProfile,
   updateCandidateProfile,
@@ -14,8 +13,10 @@ router
   .post(verifyJWT, createCandidateProfile)
   .get(verifyJWT, getCandidateProfile);
 
-router.route("/profile").patch(verifyJWT, updateCandidateProfile);
+router
+  .route("/profile")
+  .patch(verifyJWT, updateCandidateProfile);
 
-router.route("/experience").post(verifyJWT, addExperience);
-
+  
+  
 export default router;

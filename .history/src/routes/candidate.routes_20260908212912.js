@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
-  addExperience,
   createCandidateProfile,
   getCandidateProfile,
   updateCandidateProfile,
