@@ -145,45 +145,4 @@ const updateCandidateProfile = asyncHandler(async (req, res) => {
     );
 });
 
-const addExperience = asyncHandler(async (req, res) => {
-  const candidate = await Candidate.findOne({
-    user: req.user._id,
-  });
-
-  if (!candidate) {
-    throw new ApiError(404, "Candidate not found");
-  }
-
-  const { title, company, location, startDate, endDate, description } =
-    req.body;
-
-  if (!company?.trim() || !title?.trim()) {
-    throw new ApiError(400, "Company, title are required");
-  }
-
-  const newExperience = {
-    title,
-    company,
-    location,
-    startDate,
-    endDate,
-    description,
-  };
-
-  candidate.experience.push(newExperience);
-
-  await candidate.save();
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, candidate, "Experience added successfully"));
-});
-
-
-
-export {
-  createCandidateProfile,
-  getCandidateProfile,
-  updateCandidateProfile,
-  addExperience,
-};
+export { createCandidateProfile, getCandidateProfile, updateCandidateProfile };
