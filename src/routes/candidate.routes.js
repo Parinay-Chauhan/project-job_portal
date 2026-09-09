@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
-  addExperience,
   createCandidateProfile,
   getCandidateProfile,
   updateCandidateProfile,
+  addExperience,
+  updateExperience,
+  deleteExperience,
 } from "../controllers/candidate.controller.js";
 
 const router = Router();
@@ -17,5 +19,10 @@ router
 router.route("/profile").patch(verifyJWT, updateCandidateProfile);
 
 router.route("/experience").post(verifyJWT, addExperience);
+
+router.patch("/experience/:experienceId", verifyJWT, updateExperience);
+
+router.delete("/experience/:experienceId", verifyJWT, deleteExperience);
+
 
 export default router;
