@@ -259,36 +259,36 @@ const deleteExperience = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, candidate, "Experience deleted successfully"));
 });
 
-// const addEducation = asyncHandler(async (req, res) => {
-//   const candidate = await Candidate.findOne({
-//     user: req.user._id,
-//   });
+const addEducation = asyncHandler(async (req, res) => {
+  const candidate = await Candidate.findOne({
+    user: req.user._id,
+  });
 
-//   if (!candidate) {
-//     throw new ApiError(404, "Candidate not found");
-//   }
+  if (!candidate) {
+    throw new ApiError(404, "Candidate not found");
+  }
 
-//   const { institution, degree, fieldOfStudy, startYear, endYear } = req.body;
+  const { institution, degree, fieldOfStudy, startYear, endYear } = req.body;
 
-//   if (!institution?.trim() || !degree?.trim()) {
-//     throw new ApiError(400, "institution and degree are required");
-//   }
+  if (!institution?.trim() || !degree?.trim()) {
+    throw new ApiError(400, "institution and degree are required");
+  }
 
-//   const newEducation = {
-//     institution,
-//     degree,
-//     fieldOfStudy,
-//     startYear,
-//     endYear,
-//   };
+  const newEducation = {
+    institution,
+    degree,
+    fieldOfStudy,
+    startYear,
+    endYear,
+  };
 
-//   candidate.education.push(newEducation);
+  candidate.education.push(newEducation);
 
-//   await candidate.save();
-//   return res
-//     .status(201)
-//     .json(new ApiResponse(201, candidate, "Education added successfully"));
-// });
+  await candidate.save();
+  return res
+    .status(201)
+    .json(new ApiResponse(201, candidate, "Education added successfully"));
+});
 
 // const updateEducation = asyncHandler(async (req, res) => {
 //   const candidate = await Candidate.findOne({
@@ -375,7 +375,7 @@ export {
   addExperience,
   updateExperience,
   deleteExperience,
-  // addEducation,
+  addEducation,
   // updateEducation,
   // deleteEducation,
 };
