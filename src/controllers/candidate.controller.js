@@ -290,56 +290,56 @@ const addEducation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, candidate, "Education added successfully"));
 });
 
-// const updateEducation = asyncHandler(async (req, res) => {
-//   const candidate = await Candidate.findOne({
-//     user: req.user._id,
-//   });
+const updateEducation = asyncHandler(async (req, res) => {
+  const candidate = await Candidate.findOne({
+    user: req.user._id,
+  });
 
-//   if (!candidate) {
-//     throw new ApiError(404, "Candidate not found");
-//   }
+  if (!candidate) {
+    throw new ApiError(404, "Candidate not found");
+  }
 
-//   const { educationId } = req.params;
+  const { educationId } = req.params;
 
-//   const { institution, degree, fieldOfStudy, startYear, endYear } = req.body;
+  const { institution, degree, fieldOfStudy, startYear, endYear } = req.body;
 
-//   const educationIndex = candidate.education.findIndex(
-//     (edu) => edu._id.toString() === educationId,
-//   );
+  const educationIndex = candidate.education.findIndex(
+    (edu) => edu._id.toString() === educationId,
+  );
 
-//   if (educationIndex === -1) {
-//     throw new ApiError(404, "Education not found");
-//   }
+  if (educationIndex === -1) {
+    throw new ApiError(404, "Education not found");
+  }
 
-//   candidate.education[educationIndex] = {
-//     ...candidate.education[educationIndex]._doc,
-//     institution:
-//       institution !== undefined
-//         ? institution
-//         : candidate.education[educationIndex].institution,
-//     degree:
-//       degree !== undefined
-//         ? degree
-//         : candidate.education[educationIndex].degree,
-//     fieldOfStudy:
-//       fieldOfStudy !== undefined
-//         ? fieldOfStudy
-//         : candidate.education[educationIndex].fieldOfStudy,
-//     startYear:
-//       startYear !== undefined
-//         ? startYear
-//         : candidate.education[educationIndex].startYear,
-//     endYear:
-//       endYear !== undefined
-//         ? endYear
-//         : candidate.education[educationIndex].endYear,
-//   };
+  candidate.education[educationIndex] = {
+    ...candidate.education[educationIndex]._doc,
+    institution:
+      institution !== undefined
+        ? institution
+        : candidate.education[educationIndex].institution,
+    degree:
+      degree !== undefined
+        ? degree
+        : candidate.education[educationIndex].degree,
+    fieldOfStudy:
+      fieldOfStudy !== undefined
+        ? fieldOfStudy
+        : candidate.education[educationIndex].fieldOfStudy,
+    startYear:
+      startYear !== undefined
+        ? startYear
+        : candidate.education[educationIndex].startYear,
+    endYear:
+      endYear !== undefined
+        ? endYear
+        : candidate.education[educationIndex].endYear,
+  };
 
-//   await candidate.save();
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, candidate, "Education updated successfully"));
-// });
+  await candidate.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, candidate, "Education updated successfully"));
+});
 
 // const deleteEducation = asyncHandler(async (req, res) => {
 //   const candidate = await Candidate.findOne({
@@ -376,6 +376,6 @@ export {
   updateExperience,
   deleteExperience,
   addEducation,
-  // updateEducation,
+  updateEducation,
   // deleteEducation,
 };
