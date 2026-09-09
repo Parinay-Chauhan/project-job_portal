@@ -341,32 +341,32 @@ const updateEducation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, candidate, "Education updated successfully"));
 });
 
-// const deleteEducation = asyncHandler(async (req, res) => {
-//   const candidate = await Candidate.findOne({
-//     user: req.user._id,
-//   });
+const deleteEducation = asyncHandler(async (req, res) => {
+  const candidate = await Candidate.findOne({
+    user: req.user._id,
+  });
 
-//   if (!candidate) {
-//     throw new ApiError(404, "Candidate not found");
-//   }
+  if (!candidate) {
+    throw new ApiError(404, "Candidate not found");
+  }
 
-//   const { educationId } = req.params;
+  const { educationId } = req.params;
 
-//   const educationIndex = candidate.education.findIndex(
-//     (edu) => edu._id.toString() === educationId,
-//   );
+  const educationIndex = candidate.education.findIndex(
+    (edu) => edu._id.toString() === educationId,
+  );
 
-//   if (educationIndex === -1) {
-//     throw new ApiError(404, "Education not found");
-//   }
+  if (educationIndex === -1) {
+    throw new ApiError(404, "Education not found");
+  }
 
-//   candidate.education.splice(educationIndex, 1);
+  candidate.education.splice(educationIndex, 1);
 
-//   await candidate.save();
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, candidate, "Education deleted successfully"));
-// });
+  await candidate.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, candidate, "Education deleted successfully"));
+});
 
 export {
   createCandidateProfile,
@@ -377,5 +377,5 @@ export {
   deleteExperience,
   addEducation,
   updateEducation,
-  // deleteEducation,
+  deleteEducation,
 };
