@@ -9,7 +9,7 @@ import {
   deleteExperience,
   addEducation,
   updateEducation,
-  // deleteEducation,
+  deleteEducation,
 } from "../controllers/candidate.controller.js";
 
 const router = Router();
@@ -23,6 +23,6 @@ router.delete("/experience/:experienceId", verifyJWT, deleteExperience);
 
 router.route("/education").post(verifyJWT, addEducation);
 router.patch("/education/:educationId", verifyJWT, updateEducation);
-// router.delete("/education/:educationId", verifyJWT, deleteEducation);
+router.delete("/education/:educationId", verifyJWT, deleteEducation);
 
 export default router;
