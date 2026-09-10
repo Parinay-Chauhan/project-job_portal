@@ -10,8 +10,9 @@ import {
   addEducation,
   updateEducation,
   deleteEducation,
+  uploadResume,
 } from "../controllers/candidate.controller.js";
-
+import { upload } from "../middleware/multer.middleware.js";
 const router = Router();
 
 router.route("/profile").post(verifyJWT, createCandidateProfile).get(verifyJWT, getCandidateProfile);
@@ -24,5 +25,8 @@ router.delete("/experience/:experienceId", verifyJWT, deleteExperience);
 router.route("/education").post(verifyJWT, addEducation);
 router.patch("/education/:educationId", verifyJWT, updateEducation);
 router.delete("/education/:educationId", verifyJWT, deleteEducation);
+
+router.route("/resume").post(verifyJWT, upload.single("resume"), uploadResume);
+
 
 export default router;
