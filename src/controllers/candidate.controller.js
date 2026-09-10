@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Candidate } from "../models/candidateProfile.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 
 const createCandidateProfile = asyncHandler(async (req, res) => {
   // 1. req.user se logged-in user lena & check karna user exist karta hai
@@ -368,6 +370,60 @@ const deleteEducation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, candidate, "Education deleted successfully"));
 });
 
+const uploadResume = asyncHandler(async (req, res) => {
+  // 1. req.file check karo
+  const localFilePath = req.file?.path;
+
+  if (!localFilePath) {
+    throw new ApiError(400, "Resume file is required");
+  }
+
+  // 2. Candidate find karo
+  const candidate = await Candidate.findOne({
+    user: req.user._id,
+  });
+
+  if (!candidate) {
+    throw new ApiError(404, "Candidate profile not found");
+  }
+
+  // 3. Old resume ka publicId save rakho
+  const oldResumePublicId = candidate.resumePublicId;
+
+  // 4. New resume Cloudinary par upload
+  const response = await uploadOnCloudinary(localFilePath);
+
+  // 5. New upload successful check
+  if (!response || !response.secure_url) {
+    throw new ApiError(500, "Failed to upload resume to Cloudinary");
+  }
+
+  // 6. DB mein new URL + publicId save
+  try {
+    candidate.resume = response.secure_url;
+    candidate.resumePublicId = response.public_id;
+
+    await candidate.save({ validateBeforeSave: false });
+  } catch (error) {
+    // DB save fail hone par NAYI uploaded Cloudinary file cleanup (Rollback)
+    await deleteFromCloudinary(response.public_id, "raw");
+    throw new ApiError(
+      500,
+      "Failed to save candidate resume, upload rolled back",
+    );
+  }
+
+  // 7. Old resume delete (OLD ID se, only if it exists)
+  if (oldResumePublicId) {
+    await deleteFromCloudinary(oldResumePublicId, "raw");
+  }
+
+  // 8. 200 Response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, candidate, "Resume uploaded successfully"));
+});
+
 export {
   createCandidateProfile,
   getCandidateProfile,
@@ -378,4 +434,5 @@ export {
   addEducation,
   updateEducation,
   deleteEducation,
+  uploadResume,
 };
