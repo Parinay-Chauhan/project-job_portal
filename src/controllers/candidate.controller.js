@@ -391,7 +391,10 @@ const uploadAndUpdateResume = asyncHandler(async (req, res) => {
 
   // 3. Old resume ka publicId save rakho
   const oldResumePublicId = candidate.resumePublicId;
-  console.log("Old Resume Public ID Found:", oldResumePublicId);
+  const oldResourceType = candidate.resumeResourceType || "raw";
+
+  // console.log("Old Resume Public ID Found:", oldResumePublicId);
+
   // 4. New resume Cloudinary par upload
   const response = await uploadOnCloudinary(localFilePath);
 
@@ -404,11 +407,14 @@ const uploadAndUpdateResume = asyncHandler(async (req, res) => {
   try {
     candidate.resume = response.secure_url;
     candidate.resumePublicId = response.public_id;
-
-    await candidate.save({ validateBeforeSave: false });
+    candidate.resumeResourceType = response.resource_type; // Dynamic type ("image" ya "raw")
+    await candidate.save();
   } catch (error) {
     // DB save fail hone par NAYI uploaded Cloudinary file cleanup (Rollback)
-    await deleteFromCloudinary(response.public_id, "raw");
+    await deleteFromCloudinary(
+      response.public_id,
+      response.resource_type || "raw",
+    );
     throw new ApiError(
       500,
       "Failed to save candidate resume, upload rolled back",
@@ -417,17 +423,60 @@ const uploadAndUpdateResume = asyncHandler(async (req, res) => {
 
   // 7. Old resume delete (OLD ID se, only if it exists)
   if (oldResumePublicId) {
-    console.log("Deleting old resume from Cloudinary:", oldResumePublicId);
-    const deleteResult = await deleteFromCloudinary(oldResumePublicId, "raw");
-    console.log("Cloudinary Delete Result:", deleteResult);
-  } else {
-    console.log("No old resume public ID was found in DB!");
+    await deleteFromCloudinary(oldResumePublicId, oldResourceType);
   }
 
   // 8. 200 Response
   return res
     .status(200)
-    .json(new ApiResponse(200, candidate, "Resume uploaded successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        candidate,
+        "Resume uploaded and updated successfully",
+      ),
+    );
+});
+
+const deleteResume = asyncHandler(async (req, res) => {
+  // 1. Candidate profile find karo
+  const candidate = await Candidate.findOne({
+    user: req.user._id,
+  });
+
+  if (!candidate) {
+    throw new ApiError(404, "Candidate profile not found");
+  }
+
+  // 2. Check karo ki resume exist karta bhi hai ya nahi
+  if (!candidate.resumePublicId) {
+    throw new ApiError(400, "No resume found to delete");
+  }
+
+  // 3. Cloudinary se resume file remove karo
+  const resourceType = candidate.resumeResourceType || "raw";
+  const deleteResult = await deleteFromCloudinary(
+    candidate.resumePublicId,
+    resourceType,
+  );
+
+  if (!deleteResult) {
+    throw new ApiError(500, "Failed to delete resume from Cloudinary");
+  }
+
+  // 4. Database fields clear karo
+  candidate.resume = "";
+  candidate.resumePublicId = "";
+  if (candidate.resumeResourceType) {
+    candidate.resumeResourceType = "";
+  }
+
+  await candidate.save();
+
+  // 5. Response send karo
+  return res
+    .status(200)
+    .json(new ApiResponse(200, candidate, "Resume deleted successfully"));
 });
 
 export {
@@ -441,4 +490,5 @@ export {
   updateEducation,
   deleteEducation,
   uploadAndUpdateResume,
+  deleteResume,
 };
