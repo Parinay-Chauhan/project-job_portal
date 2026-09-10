@@ -2,8 +2,10 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Candidate } from "../models/candidateProfile.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
-
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 
 const createCandidateProfile = asyncHandler(async (req, res) => {
   // 1. req.user se logged-in user lena & check karna user exist karta hai
@@ -370,7 +372,7 @@ const deleteEducation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, candidate, "Education deleted successfully"));
 });
 
-const uploadResume = asyncHandler(async (req, res) => {
+const uploadAndUpdateResume = asyncHandler(async (req, res) => {
   // 1. req.file check karo
   const localFilePath = req.file?.path;
 
@@ -389,7 +391,7 @@ const uploadResume = asyncHandler(async (req, res) => {
 
   // 3. Old resume ka publicId save rakho
   const oldResumePublicId = candidate.resumePublicId;
-
+  console.log("Old Resume Public ID Found:", oldResumePublicId);
   // 4. New resume Cloudinary par upload
   const response = await uploadOnCloudinary(localFilePath);
 
@@ -415,7 +417,11 @@ const uploadResume = asyncHandler(async (req, res) => {
 
   // 7. Old resume delete (OLD ID se, only if it exists)
   if (oldResumePublicId) {
-    await deleteFromCloudinary(oldResumePublicId, "raw");
+    console.log("Deleting old resume from Cloudinary:", oldResumePublicId);
+    const deleteResult = await deleteFromCloudinary(oldResumePublicId, "raw");
+    console.log("Cloudinary Delete Result:", deleteResult);
+  } else {
+    console.log("No old resume public ID was found in DB!");
   }
 
   // 8. 200 Response
@@ -434,5 +440,5 @@ export {
   addEducation,
   updateEducation,
   deleteEducation,
-  uploadResume,
+  uploadAndUpdateResume,
 };
