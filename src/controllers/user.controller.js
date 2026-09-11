@@ -53,6 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username,
+    // role: role || "candidate", // Default role is "candidate" if not provided
   });
 
   // Fetch the newly created user from the database and exclude the password field from the response
