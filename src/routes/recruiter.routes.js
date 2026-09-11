@@ -12,6 +12,7 @@ router.use(verifyJWT);
 router.use(authorizeRoles("recruiter"));
 // router.use(verifyJWT, authorizeRoles("recruiter"));
 
+
 router
   .route("/profile")
   .post(createOrUpdateRecruiterProfile)
