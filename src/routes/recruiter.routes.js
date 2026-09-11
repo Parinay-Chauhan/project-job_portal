@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { verifyJWT, authorizeRoles } from "../middleware/Auth.middleware.js";
 import {
-  createOrUpdateRecruiterProfile,
+  createRecruiterProfile,
   getRecruiterProfile,
+  updateRecruiterProfile,
 } from "../controllers/recruiter.controller.js";
+
 
 const router = Router();
 
@@ -13,10 +15,11 @@ router.use(authorizeRoles("recruiter"));
 // router.use(verifyJWT, authorizeRoles("recruiter"));
 
 
+// Profile Routes
 router
   .route("/profile")
-  .post(createOrUpdateRecruiterProfile)
+  .post(createRecruiterProfile)
   .get(getRecruiterProfile)
-  .patch(createOrUpdateRecruiterProfile);
+  .patch(updateRecruiterProfile);
 
 export default router;
