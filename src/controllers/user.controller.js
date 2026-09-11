@@ -29,7 +29,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   // +++++++++++++ Data Validation +++++++++++++
 
-  const { username, email, password, fullName } = req.body;
+  const { username, email, password, fullName, role } = req.body;
 
   // Check if all required fields are provided and not empty
 
@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username,
-    // role: role || "candidate", // Default role is "candidate" if not provided
+    role: role || "candidate", // Default role is "candidate" if not provided
   });
 
   // Fetch the newly created user from the database and exclude the password field from the response
