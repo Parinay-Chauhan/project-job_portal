@@ -14,6 +14,7 @@ import {
   deleteResume,
 } from "../controllers/candidate.controller.js";
 import { upload } from "../middleware/multer.middleware.js";
+
 const router = Router();
 
 router.use(verifyJWT);
