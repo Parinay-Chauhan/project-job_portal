@@ -5,7 +5,7 @@ const jobSchema = new Schema(
     recruiter: {
       type: Schema.Types.ObjectId,
       ref: "RecruiterProfile",
-      required: true,
+      required: [true, "Recruiter profile reference is required"],
     },
 
     title: {
