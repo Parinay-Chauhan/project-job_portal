@@ -89,4 +89,149 @@ const postJob = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, job, "Job posted successfully"));
 });
 
-export { postJob };
+// 2. Get All Jobs (Public / Candidate Feed with Filtering & Search)
+const getAllJobs = asyncHandler(async (req, res) => {
+  const { keyword, location, jobType, page = 1, limit = 10 } = req.query;
+
+  const query = { isActive: true };
+
+  // Search keyword in title or description
+  if (keyword) {
+    query.$or = [
+      { title: { $regex: keyword, $options: "i" } },
+      { description: { $regex: keyword, $options: "i" } },
+    ];
+  }
+
+  if (location) {
+    query.location = { $regex: location, $options: "i" };
+  }
+
+  if (jobType) {
+    query.jobType = jobType;
+  }
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const jobs = await Job.find(query)
+    .populate({
+      path: "recruiter",
+      select: "companyName companyLogo location industry",
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
+
+  const totalJobs = await Job.countDocuments(query);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        jobs,
+        pagination: {
+          totalJobs,
+          currentPage: Number(page),
+          totalPages: Math.ceil(totalJobs / Number(limit)),
+        },
+      },
+      "Jobs fetched successfully",
+    ),
+  );
+});
+
+// 3. Get Recruiter's Posted Jobs
+const getMyPostedJobs = asyncHandler(async (req, res) => {
+  const recruiterProfile = await RecruiterProfile.findOne({
+    user: req.user._id,
+  });
+
+  if (!recruiterProfile) {
+    throw new ApiError(404, "Recruiter profile not found");
+  }
+
+  const jobs = await Job.find({ recruiter: recruiterProfile._id })
+    .populate("recruiter", "companyName companyLogo location industry")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, jobs, "Posted jobs fetched successfully"));
+});
+
+// // 4. Get Single Job Details by ID
+// const getJobById = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const job = await Job.findById(id).populate({
+//     path: "recruiter",
+//     select:
+//       "companyName companyLogo companyWebsite companyDescription location industry",
+//   });
+
+//   if (!job) {
+//     throw new ApiError(404, "Job not found");
+//   }
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, job, "Job details fetched successfully"));
+// });
+
+// // 5. Update Job (Recruiter Only)
+// const updateJob = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const job = await Job.findById(id);
+
+//   if (!job) {
+//     throw new ApiError(404, "Job not found");
+//   }
+
+//   // Authorization check: Only the recruiter who created the job can update it
+//   if (job.createdBy.toString() !== req.user._id.toString()) {
+//     throw new ApiError(403, "You are not authorized to update this job");
+//   }
+
+//   const updatedJob = await Job.findByIdAndUpdate(
+//     id,
+//     { $set: req.body },
+//     { returnDocument: "after", runValidators: true },
+//   );
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, updatedJob, "Job updated successfully"));
+// });
+
+// // 6. Delete Job (Recruiter Only)
+// const deleteJob = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const job = await Job.findById(id);
+
+//   if (!job) {
+//     throw new ApiError(404, "Job not found");
+//   }
+
+//   if (job.createdBy.toString() !== req.user._id.toString()) {
+//     throw new ApiError(403, "You are not authorized to delete this job");
+//   }
+
+//   await Job.findByIdAndDelete(id);
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, {}, "Job deleted successfully"));
+// });
+
+export {
+  postJob,
+  getAllJobs,
+  getMyPostedJobs,
+//   getJobById,
+//   updateJob,
+//   deleteJob,
+};
+
+
