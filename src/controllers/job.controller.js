@@ -159,79 +159,79 @@ const getMyPostedJobs = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, jobs, "Posted jobs fetched successfully"));
 });
 
-// // 4. Get Single Job Details by ID
-// const getJobById = asyncHandler(async (req, res) => {
-//   const { id } = req.params;
+// 4. Get Single Job Details by ID
+const getJobById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-//   const job = await Job.findById(id).populate({
-//     path: "recruiter",
-//     select:
-//       "companyName companyLogo companyWebsite companyDescription location industry",
-//   });
+  const job = await Job.findById(id).populate({
+    path: "recruiter",
+    select:
+      "companyName companyLogo companyWebsite companyDescription location industry",
+  });
 
-//   if (!job) {
-//     throw new ApiError(404, "Job not found");
-//   }
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
 
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, job, "Job details fetched successfully"));
-// });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, job, "Job details fetched successfully"));
+});
 
-// // 5. Update Job (Recruiter Only)
-// const updateJob = asyncHandler(async (req, res) => {
-//   const { id } = req.params;
+// 5. Update Job (Recruiter Only)
+const updateJob = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-//   const job = await Job.findById(id);
+  const job = await Job.findById(id);
 
-//   if (!job) {
-//     throw new ApiError(404, "Job not found");
-//   }
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
 
-//   // Authorization check: Only the recruiter who created the job can update it
-//   if (job.createdBy.toString() !== req.user._id.toString()) {
-//     throw new ApiError(403, "You are not authorized to update this job");
-//   }
+  // Authorization check: Only the recruiter who created the job can update it
+  if (job.createdBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this job");
+  }
 
-//   const updatedJob = await Job.findByIdAndUpdate(
-//     id,
-//     { $set: req.body },
-//     { returnDocument: "after", runValidators: true },
-//   );
+  const updatedJob = await Job.findByIdAndUpdate(
+    id,
+    { $set: req.body },
+    { returnDocument: "after", runValidators: true },
+  );
 
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, updatedJob, "Job updated successfully"));
-// });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedJob, "Job updated successfully"));
+});
 
-// // 6. Delete Job (Recruiter Only)
-// const deleteJob = asyncHandler(async (req, res) => {
-//   const { id } = req.params;
+// 6. Delete Job (Recruiter Only)
+const deleteJob = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-//   const job = await Job.findById(id);
+  const job = await Job.findById(id);
 
-//   if (!job) {
-//     throw new ApiError(404, "Job not found");
-//   }
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
 
-//   if (job.createdBy.toString() !== req.user._id.toString()) {
-//     throw new ApiError(403, "You are not authorized to delete this job");
-//   }
+  if (job.createdBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to delete this job");
+  }
 
-//   await Job.findByIdAndDelete(id);
+  await Job.findByIdAndDelete(id);
 
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, {}, "Job deleted successfully"));
-// });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Job deleted successfully"));
+});
 
 export {
   postJob,
   getAllJobs,
   getMyPostedJobs,
-//   getJobById,
-//   updateJob,
-//   deleteJob,
+  getJobById,
+  updateJob,
+  deleteJob,
 };
 
 
