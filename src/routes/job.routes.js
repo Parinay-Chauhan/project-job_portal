@@ -4,9 +4,9 @@ import {
   postJob,
   getAllJobs,
   getMyPostedJobs,
-//   getJobById,
-//   updateJob,
-//   deleteJob,
+  getJobById,
+  updateJob,
+  deleteJob,
 } from "../controllers/job.controller.js";
 
 const router = Router();
@@ -22,9 +22,9 @@ router
   .route("/my-jobs")
   .get(verifyJWT, authorizeRoles("recruiter"), getMyPostedJobs);
 
-// router
-//   .route("/:id")
-//   .patch(verifyJWT, authorizeRoles("recruiter"), updateJob)
-//   .delete(verifyJWT, authorizeRoles("recruiter"), deleteJob);
+router
+  .route("/:id")
+  .patch(verifyJWT, authorizeRoles("recruiter"), updateJob)
+  .delete(verifyJWT, authorizeRoles("recruiter"), deleteJob);
 
 export default router;
